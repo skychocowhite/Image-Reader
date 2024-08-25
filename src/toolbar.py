@@ -1,10 +1,11 @@
-from PyQt5.QtWidgets import (QToolBar, QAction, QLabel, QDialog, 
-                             QVBoxLayout, QSlider, QDialogButtonBox, 
+from PyQt5.QtWidgets import (QToolBar, QAction, QLabel, QDialog,
+                             QVBoxLayout, QSlider, QDialogButtonBox,
                              QFileDialog, QLineEdit)
 from PyQt5.QtGui import QIcon
 from PyQt5.QtCore import Qt
 
 from config_loader import ConfigLoader
+
 
 class MainToolBar(QToolBar):
     def __init__(self, parent):
@@ -28,24 +29,31 @@ class MainToolBar(QToolBar):
         self.back_action = back_action
         self.addAction(back_action)
 
-        adjust_scroll_action = QAction(QIcon('_assets_/adjust.png'), '調整滾動行數', self)
+        adjust_scroll_action = QAction(
+            QIcon('_assets_/adjust.png'), '調整滾動行數', self)
         adjust_scroll_action.triggered.connect(self.open_adjust_scroll_dialog)
         self.addAction(adjust_scroll_action)
 
-        adjust_layout_action = QAction(QIcon('_assets_/relayout.png'), '重新調整佈局', self)
-        adjust_layout_action.triggered.connect(self.parent.image_reader.adjust_layout)
+        adjust_layout_action = QAction(
+            QIcon('_assets_/relayout.png'), '重新調整佈局', self)
+        adjust_layout_action.triggered.connect(
+            self.parent.image_reader.adjust_layout)
         self.addAction(adjust_layout_action)
 
         settings_action = QAction(QIcon('_assets_/setting.png'), '設定', self)
         settings_action.triggered.connect(self.open_settings_dialog)
         self.addAction(settings_action)
 
-        single_page_action = QAction(QIcon('_assets_/single_page.png'), '單頁模式', self)
-        single_page_action.triggered.connect(lambda: self.parent.switch_mode('single',self.folder_stack[-1]))
+        single_page_action = QAction(
+            QIcon('_assets_/single_page.png'), '單頁模式', self)
+        single_page_action.triggered.connect(
+            lambda: self.parent.switch_mode('single', self.folder_stack[-1]))
         self.addAction(single_page_action)
 
-        multi_page_action = QAction(QIcon('_assets_/multi_page.png'), '多頁模式', self)
-        multi_page_action.triggered.connect(lambda: self.parent.switch_mode('multi',self.folder_stack[-1]))
+        multi_page_action = QAction(
+            QIcon('_assets_/multi_page.png'), '多頁模式', self)
+        multi_page_action.triggered.connect(
+            lambda: self.parent.switch_mode('multi', self.folder_stack[-1]))
         self.addAction(multi_page_action)
 
         self.path_label = QLabel(self.default_folder_path)
@@ -68,12 +76,12 @@ class MainToolBar(QToolBar):
             self.parent.display_folders(previous_folder)
         if len(self.folder_stack) <= 1:
             self.back_action.setEnabled(False)
-    
+
     def folder_clicked_log(self, folder_path):
         self.folder_stack.append(folder_path)
         self.path_label.setText(folder_path)
         self.back_action.setEnabled(True)
-    
+
     def open_adjust_scroll_dialog(self):
         dialog = self.AdjustScrollDialog(self)
         if dialog.exec_() == QDialog.Accepted:
@@ -109,7 +117,8 @@ class MainToolBar(QToolBar):
             self.slider.setTickInterval(100)
             layout.addWidget(self.slider)
 
-            buttons = QDialogButtonBox(QDialogButtonBox.Ok | QDialogButtonBox.Cancel)
+            buttons = QDialogButtonBox(
+                QDialogButtonBox.Ok | QDialogButtonBox.Cancel)
             buttons.accepted.connect(self.accept)
             buttons.rejected.connect(self.reject)
             layout.addWidget(buttons)
@@ -140,7 +149,8 @@ class MainToolBar(QToolBar):
             layout.addWidget(self.image_width_label)
             layout.addWidget(self.image_width_input)
 
-            buttons = QDialogButtonBox(QDialogButtonBox.Ok | QDialogButtonBox.Cancel)
+            buttons = QDialogButtonBox(
+                QDialogButtonBox.Ok | QDialogButtonBox.Cancel)
             buttons.accepted.connect(self.accept)
             buttons.rejected.connect(self.reject)
             layout.addWidget(buttons)
@@ -152,5 +162,3 @@ class MainToolBar(QToolBar):
                 'height': int(self.image_height_input.text()),
                 'width': int(self.image_width_input.text())
             }
-
-

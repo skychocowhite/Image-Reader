@@ -8,6 +8,7 @@ Created on Sat Jul 27 12:55:58 2024
 import os
 import json
 
+
 class ConfigLoader:
     @staticmethod
     def load_config():
