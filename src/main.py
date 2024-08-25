@@ -72,7 +72,24 @@ class ImageViewer(QMainWindow):
             }
             if key in navigation_map:
                 navigation_map[key]()
-    
+        
+        if key == Qt.Key_N:
+            if self.active_module == 'folder_image_reader':
+                # 進入選取模式
+                self.init_active_module('selection_mode')
+                self.image_reader.clear_selected_folders()
+                self.image_reader.set_callback(self.handle_checkbox_click)
+                # 顯示所有資料夾以供選取
+                self.image_reader.display_folders(self.image_reader.folder_path, self.scrollArea, include_selected_only=True)
+            elif self.active_module == 'selection_mode':
+                # 退出選取模式並開始顯示選取的圖片
+                self.init_active_module('multi')
+                # 使用 ImageHandler 加載選取的資料夾中的圖片
+                self.image_handler.load_images_from_folders(self.image_reader.selected_folders, self.scrollArea)
+                self.image_handler.display_images(self.scrollArea)
+            else:
+                print("No service")
+                
         elif self.active_module in ['multi', 'single']:
             scroll_map = {
                 Qt.Key_W: QScrollBar.SliderSingleStepSub,
@@ -99,7 +116,20 @@ class ImageViewer(QMainWindow):
                     self.image_handler_single.previous_image(self.scrollArea)
     
         super().keyPressEvent(event)
-        
+
+    def handle_checkbox_click(self, state, folder_path):
+        """專門處理選取模式下核取方塊的回調"""
+        if state == Qt.Checked:
+            # 如果核取方塊被選中，添加到選取列表
+            if folder_path not in self.image_reader.selected_folders:
+                self.image_reader.add_selected_folder(folder_path)
+                # print(f"已選取資料夾: {folder_path}")
+        elif state == Qt.Unchecked:
+            # 如果核取方塊取消選中，從選取列表中移除
+            if folder_path in self.image_reader.selected_folders:
+                self.image_reader.remove_selected_folder(folder_path)
+                # print(f"已取消選取資料夾: {folder_path}")
+                
     def init_active_module(self, flag):
         self.active_module = flag
         self.image_reader.active_module = flag
