@@ -20,8 +20,7 @@ class ImageViewer(QMainWindow):
 
         self.initUI()  # 執行 initUI 方法來設定使用者介面
 
-        self.toolbar.open_folder(
-            self.toolbar.default_folder_path)  # 開啟工具列預設資料夾
+        self.toolbar.open_folder()  # 開啟工具列預設資料夾
         self.active_module = 'folder_image_reader'  # 默認為多頁模式
         QTimer.singleShot(50, self.image_reader.adjust_layout)
 

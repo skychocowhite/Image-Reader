@@ -1,6 +1,6 @@
 import pathlib
 
-from PyQt5.QtWidgets import (QApplication, QToolBar, QAction, QLabel, QDialog,
+from PyQt5.QtWidgets import (QToolBar, QAction, QLabel, QDialog,
                              QVBoxLayout, QSlider, QDialogButtonBox,
                              QFileDialog, QLineEdit)
 from PyQt5.QtGui import QIcon
@@ -16,7 +16,6 @@ class MainToolBar(QToolBar):
         self.setParent(parent)
         self.folder_stack = []
         self.config = ConfigLoader.load_config()
-        self.default_folder_path = self.config.get("default_folder_path", "")
         self.image_height = self.config.get("image_height", 400)
         self.image_width = self.config.get("image_width", 400)
         self.asset_path = str(pathlib.Path(
@@ -64,7 +63,7 @@ class MainToolBar(QToolBar):
             lambda: self.parent().switch_mode('multi', self.folder_stack[-1]))
         self.addAction(multi_page_action)
 
-        self.path_label = QLabel(self.default_folder_path)
+        self.path_label = QLabel()
         self.addWidget(self.path_label)
 
     def open_folder(self, folder_path=None):
