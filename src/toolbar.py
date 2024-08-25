@@ -1,59 +1,67 @@
-from PyQt5.QtWidgets import (QToolBar, QAction, QLabel, QDialog,
+import pathlib
+
+from PyQt5.QtWidgets import (QApplication, QToolBar, QAction, QLabel, QDialog,
                              QVBoxLayout, QSlider, QDialogButtonBox,
                              QFileDialog, QLineEdit)
 from PyQt5.QtGui import QIcon
 from PyQt5.QtCore import Qt
 
-from config_loader import ConfigLoader
+
+from .config_loader import ConfigLoader
 
 
 class MainToolBar(QToolBar):
     def __init__(self, parent):
         super().__init__("主工具欄", parent)
-        self.parent = parent
+        self.setParent(parent)
         self.folder_stack = []
         self.config = ConfigLoader.load_config()
         self.default_folder_path = self.config.get("default_folder_path", "")
         self.image_height = self.config.get("image_height", 400)
         self.image_width = self.config.get("image_width", 400)
+        self.asset_path = str(pathlib.Path(
+            __file__).parent.absolute()) + '/_assets_/'
         self.initUI()
 
     def initUI(self):
-        open_action = QAction(QIcon('_assets_/open.png'), '打開文件夾', self)
+        open_action = QAction(
+            QIcon(self.asset_path + 'open.png'), '打開文件夾', self)
         open_action.triggered.connect(self.open_folder)
         self.addAction(open_action)
 
-        back_action = QAction(QIcon('_assets_/back.png'), '返回上一頁', self)
+        back_action = QAction(
+            QIcon(self.asset_path + 'back.png'), '返回上一頁', self)
         back_action.triggered.connect(self.go_back)
         back_action.setEnabled(False)
         self.back_action = back_action
         self.addAction(back_action)
 
         adjust_scroll_action = QAction(
-            QIcon('_assets_/adjust.png'), '調整滾動行數', self)
+            QIcon(self.asset_path + 'adjust.png'), '調整滾動行數', self)
         adjust_scroll_action.triggered.connect(self.open_adjust_scroll_dialog)
         self.addAction(adjust_scroll_action)
 
         adjust_layout_action = QAction(
-            QIcon('_assets_/relayout.png'), '重新調整佈局', self)
+            QIcon(self.asset_path + 'relayout.png'), '重新調整佈局', self)
         adjust_layout_action.triggered.connect(
-            self.parent.image_reader.adjust_layout)
+            self.parent().image_reader.adjust_layout)
         self.addAction(adjust_layout_action)
 
-        settings_action = QAction(QIcon('_assets_/setting.png'), '設定', self)
+        settings_action = QAction(
+            QIcon(self.asset_path + 'setting.png'), '設定', self)
         settings_action.triggered.connect(self.open_settings_dialog)
         self.addAction(settings_action)
 
         single_page_action = QAction(
-            QIcon('_assets_/single_page.png'), '單頁模式', self)
+            QIcon(self.asset_path + 'single_page.png'), '單頁模式', self)
         single_page_action.triggered.connect(
-            lambda: self.parent.switch_mode('single', self.folder_stack[-1]))
+            lambda: self.parent().switch_mode('single', self.folder_stack[-1]))
         self.addAction(single_page_action)
 
         multi_page_action = QAction(
-            QIcon('_assets_/multi_page.png'), '多頁模式', self)
+            QIcon(self.asset_path + 'multi_page.png'), '多頁模式', self)
         multi_page_action.triggered.connect(
-            lambda: self.parent.switch_mode('multi', self.folder_stack[-1]))
+            lambda: self.parent().switch_mode('multi', self.folder_stack[-1]))
         self.addAction(multi_page_action)
 
         self.path_label = QLabel(self.default_folder_path)
@@ -65,7 +73,7 @@ class MainToolBar(QToolBar):
         if folder_path:
             self.folder_stack.append(folder_path)
             self.path_label.setText(folder_path)
-            self.parent.display_folders(folder_path)
+            self.parent().display_folders(folder_path)
             self.back_action.setEnabled(True)
 
     def go_back(self):
@@ -73,7 +81,7 @@ class MainToolBar(QToolBar):
             self.folder_stack.pop()
             previous_folder = self.folder_stack[-1]
             self.path_label.setText(previous_folder)
-            self.parent.display_folders(previous_folder)
+            self.parent().display_folders(previous_folder)
         if len(self.folder_stack) <= 1:
             self.back_action.setEnabled(False)
 
@@ -86,7 +94,7 @@ class MainToolBar(QToolBar):
         dialog = self.AdjustScrollDialog(self)
         if dialog.exec_() == QDialog.Accepted:
             value = dialog.get_value()
-            self.parent.scrollArea.verticalScrollBar().setSingleStep(value)
+            self.parent().scrollArea.verticalScrollBar().setSingleStep(value)
 
     def open_settings_dialog(self):
         dialog = self.SettingsDialog(self)
@@ -98,7 +106,7 @@ class MainToolBar(QToolBar):
             ConfigLoader.save_config(self.config)
 
     def update_image_size(self, height, width):
-        self.parent.image_reader.update_image_size(height, width)
+        self.parent().image_reader.update_image_size(height, width)
 
     class AdjustScrollDialog(QDialog):
         def __init__(self, parent=None):

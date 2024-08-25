@@ -1,12 +1,10 @@
-import sys
-
-from PyQt5.QtWidgets import QApplication, QMainWindow, QVBoxLayout, QScrollArea, QWidget, QScrollBar
+from PyQt5.QtWidgets import QMainWindow, QVBoxLayout, QScrollArea, QWidget, QScrollBar
 from PyQt5.QtCore import Qt, QTimer
 from PyQt5.QtGui import QKeyEvent
 
-from image_handler import ImageHandler, ImageHandlerSingle
-from folder_image_reader import FolderImageReader
-from toolbar import MainToolBar
+from .image_handler import ImageHandler, ImageHandlerSingle
+from .folder_image_reader import FolderImageReader
+from .toolbar import MainToolBar
 
 
 class ImageViewer(QMainWindow):
@@ -30,6 +28,7 @@ class ImageViewer(QMainWindow):
     def initUI(self):
         # 設定視窗標題和大小
         self.setWindowTitle('圖片瀏覽器')
+        self.setGeometry(100, 100, 800, 1000)
         self.showMaximized()                   # 設置視窗最大化顯示
 
         # 建立工具列並加入主視窗
@@ -129,14 +128,3 @@ class ImageViewer(QMainWindow):
         self.toolbar.folder_clicked_log(folder_path)
         self.init_active_module('multi')
         self.display_images(folder_path)
-
-
-def main():
-    app = QApplication(sys.argv)  # 初始化 QApplication
-    viewer = ImageViewer()        # 建立 ImageViewer 物件
-    viewer.show()                 # 顯示 ImageViewer 視窗
-    sys.exit(app.exec_())         # 進入應用程式事件迴圈
-
-
-if __name__ == '__main__':
-    main()
