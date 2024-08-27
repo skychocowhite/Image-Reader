@@ -99,6 +99,11 @@ class ImageViewer(QMainWindow):
                     self.image_handler_single.next_image(self.scrollArea)
                 elif key == Qt.Key_A:
                     self.image_handler_single.previous_image(self.scrollArea)
+            elif self.active_module == 'multi':
+                if key == Qt.Key_D:
+                    self.image_handler.next_image(self.scrollArea)
+                elif key == Qt.Key_A:
+                    self.image_handler.previous_image(self.scrollArea)
 
         super().keyPressEvent(event)
 
