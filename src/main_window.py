@@ -2,7 +2,8 @@ from PyQt5.QtWidgets import QMainWindow, QVBoxLayout, QScrollArea, QWidget, QScr
 from PyQt5.QtCore import Qt, QTimer
 from PyQt5.QtGui import QKeyEvent
 
-from .image_handler import ImageHandler, ImageHandlerSingle
+from .image_handlers.image_handler_multi import ImageHandlerMulti
+from .image_handlers.image_handler_single import ImageHandlerSingle
 from .folder_image_reader import FolderImageReader
 from .toolbar import MainToolBar
 
@@ -11,9 +12,9 @@ class ImageViewer(QMainWindow):
     def __init__(self):
         super().__init__()  # 繼承 QMainWindow 並呼叫其建構子
 
-        # 初始化 FolderImageReader、ImageHandler 和 ImageHandlerSingle 物件
+        # 初始化 FolderImageReader、ImageHandlerMulti 和 ImageHandlerSingle 物件
         self.image_reader = FolderImageReader()
-        self.image_handler = ImageHandler()
+        self.image_handler = ImageHandlerMulti()
         self.image_handler_single = ImageHandlerSingle()
 
         self.image_reader.set_callback(self.folder_clicked)  # 設定回調函數
