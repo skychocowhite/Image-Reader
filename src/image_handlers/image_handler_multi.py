@@ -14,11 +14,9 @@ class ImageHandlerMulti(ImageHandler):
         self.content_widget = QWidget()
         self.content_widget.setLayout(self.content_layout)
         scroll_area.setWidget(self.content_widget)
-        scroll_area.verticalScrollBar().valueChanged.connect(
-            lambda: self.__on_scroll(scroll_area))
         self.load_more_images()
 
-    def __on_scroll(self, scroll_area: QScrollArea):
+    def on_scroll(self, scroll_area: QScrollArea):
         val2max = scroll_area.verticalScrollBar()
         if self.active_module in ['multi'] and val2max.value() == val2max.maximum():
             self.load_more_images()

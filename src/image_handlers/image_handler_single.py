@@ -16,6 +16,10 @@ class ImageHandlerSingle(ImageHandler):
         scroll_area.setWidget(self.content_widget)
         self.load_image()
 
+    def on_scroll(self, scroll_area: QScrollArea):
+        """No any operations needed"""
+        pass
+
     def load_image(self):
         if self.current_index < len(self.images):
             img_path = self.images[self.current_index]

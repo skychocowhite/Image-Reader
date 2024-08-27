@@ -27,10 +27,19 @@ class ImageHandler:
                 img_path = os.path.join(folder_path, filename)
                 self.images.append(img_path)
 
+    def on_scroll(self, scroll_area: QScrollArea):
+        return NotImplemented
+
     def display_images(self, scroll_area: QScrollArea):
         return NotImplemented
 
     def reload_images(self):
+        return NotImplemented
+
+    def next_image(self, scroll_area: QScrollArea):
+        return NotImplemented
+
+    def previous_image(self, scroll_area: QScrollArea):
         return NotImplemented
 
     def zoom(self, factor):

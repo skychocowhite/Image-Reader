@@ -2,6 +2,7 @@ from PyQt5.QtWidgets import QMainWindow, QVBoxLayout, QScrollArea, QWidget, QScr
 from PyQt5.QtCore import Qt, QTimer
 from PyQt5.QtGui import QKeyEvent
 
+from .image_handlers.image_handler import ImageHandler
 from .image_handlers.image_handler_multi import ImageHandlerMulti
 from .image_handlers.image_handler_single import ImageHandlerSingle
 from .folder_image_reader import FolderImageReader
@@ -12,10 +13,9 @@ class ImageViewer(QMainWindow):
     def __init__(self):
         super().__init__()  # 繼承 QMainWindow 並呼叫其建構子
 
-        # 初始化 FolderImageReader、ImageHandlerMulti 和 ImageHandlerSingle 物件
+        # 初始化 FolderImageReader、ImageHandler 物件
         self.image_reader = FolderImageReader()
-        self.image_handler = ImageHandlerMulti()
-        self.image_handler_single = ImageHandlerSingle()
+        self.image_handler: ImageHandler = ImageHandlerMulti()
 
         self.image_reader.set_callback(self.folder_clicked)  # 設定回調函數
 
@@ -41,6 +41,8 @@ class ImageViewer(QMainWindow):
         self.scrollArea = QScrollArea()
         self.scrollArea.setWidgetResizable(True)
         self.scrollArea.verticalScrollBar().setSingleStep(800)
+        self.scrollArea.verticalScrollBar().valueChanged.connect(
+            lambda: self.image_handler.on_scroll(self.scrollArea))
         main_layout.addWidget(self.scrollArea)
 
         # 設定中央小部件並添加佈局
@@ -84,26 +86,18 @@ class ImageViewer(QMainWindow):
             # 检查 Ctrl 修饰键，并应用于 multi 和 single 模式
             if modifiers == Qt.ControlModifier:
                 if key == Qt.Key_W:
-                    zoom_func = self.image_handler.zoom if self.active_module == 'multi' else self.image_handler_single.zoom
-                    zoom_func(1.25)  # 放大
+                    self.image_handler.zoom(1.25)  # 放大
                 elif key == Qt.Key_S:
-                    zoom_func = self.image_handler.zoom if self.active_module == 'multi' else self.image_handler_single.zoom
-                    zoom_func(0.8)  # 缩小
+                    self.image_handler.zoom(0.8)   # 縮小
             elif key in scroll_map:
                 self.scrollArea.verticalScrollBar(
                 ).triggerAction(scroll_map[key])
             elif key == Qt.Key_Escape:
                 self.toolbar.go_back()
-            elif self.active_module == 'single':
-                if key == Qt.Key_D:
-                    self.image_handler_single.next_image(self.scrollArea)
-                elif key == Qt.Key_A:
-                    self.image_handler_single.previous_image(self.scrollArea)
-            elif self.active_module == 'multi':
-                if key == Qt.Key_D:
-                    self.image_handler.next_image(self.scrollArea)
-                elif key == Qt.Key_A:
-                    self.image_handler.previous_image(self.scrollArea)
+            elif key == Qt.Key_D:
+                self.image_handler.next_image(self.scrollArea)
+            elif key == Qt.Key_A:
+                self.image_handler.previous_image(self.scrollArea)
 
         super().keyPressEvent(event)
 
@@ -111,20 +105,19 @@ class ImageViewer(QMainWindow):
         self.active_module = flag
         self.image_reader.active_module = flag
         self.image_handler.active_module = flag
-        self.image_handler_single.active_module = flag
 
     def switch_mode(self, mode, folder_path):
-        if mode in ['multi', 'single']:
-            self.init_active_module(mode)
-            self.display_images(folder_path)
+        if mode == 'multi':
+            self.image_handler = ImageHandlerMulti()
+        elif mode == 'single':
+            self.image_handler = ImageHandlerSingle()
+
+        self.init_active_module(mode)
+        self.display_images(folder_path)
 
     def display_images(self, folder_path):
-        if self.active_module == 'multi':
-            self.image_handler.load_images(folder_path)
-            self.image_handler.display_images(self.scrollArea)
-        elif self.active_module == 'single':
-            self.image_handler_single.load_images(folder_path)
-            self.image_handler_single.display_images(self.scrollArea)
+        self.image_handler.load_images(folder_path)
+        self.image_handler.display_images(self.scrollArea)
 
     def display_folders(self, folder_path):
         self.init_active_module('folder_image_reader')
