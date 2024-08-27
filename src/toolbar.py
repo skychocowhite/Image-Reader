@@ -91,13 +91,13 @@ class MainToolBar(QToolBar):
 
     def open_adjust_scroll_dialog(self):
         dialog = self.AdjustScrollDialog(self)
-        if dialog.exec_() == QDialog.Accepted:
+        if dialog.exec() == QDialog.Accepted:
             value = dialog.get_value()
             self.parent().scrollArea.verticalScrollBar().setSingleStep(value)
 
     def open_settings_dialog(self):
         dialog = self.SettingsDialog(self)
-        if dialog.exec_() == QDialog.Accepted:
+        if dialog.exec() == QDialog.Accepted:
             size = dialog.get_image_size()
             self.update_image_size(size['height'], size['width'])
             self.config['image_height'] = size['height']

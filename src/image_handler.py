@@ -31,8 +31,8 @@ class ImageHandler:
                 self.images.append(img_path)
 
     def display_images(self, scroll_area):
-        self.content_widget = QWidget()
         self.content_layout = QVBoxLayout()
+        self.content_widget = QWidget()
         self.content_widget.setLayout(self.content_layout)
         scroll_area.setWidget(self.content_widget)
         scroll_area.verticalScrollBar().valueChanged.connect(
@@ -90,8 +90,8 @@ class ImageHandlerSingle:
                 self.images.append(img_path)
 
     def display_images(self, scroll_area):
-        self.content_widget = QWidget()
         self.content_layout = QVBoxLayout()
+        self.content_widget = QWidget()
         self.content_widget.setLayout(self.content_layout)
         scroll_area.setWidget(self.content_widget)
         self.load_image()
@@ -119,14 +119,14 @@ class ImageHandlerSingle:
         self.labels = []
         self.load_image()
 
-    def next_image(self, scrollArea):
-        scrollArea.verticalScrollBar().setValue(0)
+    def next_image(self, scroll_area):
+        scroll_area.verticalScrollBar().setValue(0)
         if self.current_index < len(self.images) - 1:
             self.current_index += 1
             self.reload_images()
 
-    def previous_image(self, scrollArea):
-        scrollArea.verticalScrollBar().setValue(0)
+    def previous_image(self, scroll_area):
+        scroll_area.verticalScrollBar().setValue(0)
         if self.current_index > 0:
             self.current_index -= 1
             self.reload_images()

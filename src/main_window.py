@@ -55,6 +55,7 @@ class ImageViewer(QMainWindow):
             self.init_active_module("folder_image_reader")
             self.image_reader.adjust_layout()
 
+        # Direction key not working
         if self.active_module == 'folder_image_reader':
             navigation_map = {
                 Qt.Key_W: lambda: self.image_reader.select_item('col', 'previous'),

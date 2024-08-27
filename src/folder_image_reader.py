@@ -1,6 +1,6 @@
 import os
 
-from PyQt5.QtWidgets import QVBoxLayout, QLabel, QWidget, QGridLayout, QDialog, QProgressBar, QApplication
+from PyQt5.QtWidgets import QVBoxLayout, QLabel, QWidget, QGridLayout, QDialog, QProgressBar, QApplication, QScrollArea
 from PyQt5.QtGui import QPixmap
 from PyQt5.QtCore import Qt, QObject, QTimer
 
@@ -13,18 +13,23 @@ class FolderImageReader(QObject):
         self.callback = None
         config = ConfigLoader.load_config()
         self.image_height = config.get(
-            "image_height", 400)  # 設置顯示圖像的高度和寬度，從配置文件中加載
+            "image_height", 400)                            # 設置顯示圖像的高度和寬度，從配置文件中加載
         self.image_width = config.get("image_width", 400)
-        self.folder_path = None  # 當前顯示的資料夾路徑
-        self.scroll_area = None  # 用於顯示資料夾的滾動區域（QScrollArea）
-        self.folders = []  # 儲存當前資料夾中的所有子資料夾路徑的列表
-        self.folders_index = 0  # 記錄當前加載的資料夾索引，用於分批加載資料夾
-        self.folders_batch_size = 20  # 每次批量加載資料夾的數量
-        self.active_module = None  # 活動模組的標識符，可能用於處理不同的功能模組
-        self.selected_index = 0  # 記錄當前選擇的項目索引
-        self.folder_widgets = []  # 保存所有資料夾小部件的列表
-        self.cols = 0  # 記錄顯示的列數，用於計算顯示布局
-        self.is_loading = False  # 標誌位，指示是否正在加載資料夾，以避免重複加載
+        self.folder_path = None                             # 當前顯示的資料夾路徑
+        # 用於顯示資料夾的滾動區域 (QScrollArea)
+        self.scroll_area = None
+
+        self.folders = []                                   # 儲存當前資料夾中的所有子資料夾路徑的列表
+        self.folders_index = 0                              # 記錄當前加載的資料夾索引，用於分批加載資料夾
+        self.folders_batch_size = 20                        # 每次批量加載資料夾的數量
+
+        # Horizontal margin between items
+        self.item_hmargin = 10
+        self.active_module = None                           # 活動模組的標識符，可能用於處理不同的功能模組
+        self.selected_index = 0                             # 記錄當前選擇的項目索引
+        self.folder_widgets = []                            # 保存所有資料夾小部件的列表
+        self.cols = 0                                       # 記錄顯示的列數，用於計算顯示布局
+        self.is_loading = False                             # 標誌位，指示是否正在加載資料夾，以避免重複加載
 
     def set_callback(self, callback):  # 設置回調函數
         self.callback = callback
@@ -32,13 +37,13 @@ class FolderImageReader(QObject):
     def update_image_size(self, height, width):  # 更新圖片顯示大小
         self.image_height = height
         self.image_width = width
-        self.adjust_layout(self)
+        self.adjust_layout()
 
     def adjust_layout(self):  # 重新調整佈局
         if self.folder_path:
             self.display_folders(self.folder_path, self.scroll_area)
 
-    def display_folders(self, folder_path, scroll_area):
+    def display_folders(self, folder_path: str, scroll_area: QScrollArea):
         def _read_folders(folder_path):
             """讀取資料夾中的子資料夾"""
             for item in os.listdir(folder_path):
@@ -46,94 +51,89 @@ class FolderImageReader(QObject):
                 if os.path.isdir(item_path):
                     yield item_path
 
-        def _set_scroll_area(content_layout, scroll_area):
-            """設置滾動區域的內容"""
-            content_widget = QWidget()
-            content_widget.setLayout(content_layout)
-            scroll_area.setWidget(content_widget)
-
-        def _create_content_layout():
-            """創建內容佈局"""
-            content_layout = QGridLayout()
-            content_layout.setSpacing(10)
-            content_layout.setContentsMargins(10, 10, 10, 10)
-            return content_layout
-
         self.folder_path = folder_path
         self.scroll_area = scroll_area
+        # Read all subfolders
         self.folders = list(_read_folders(folder_path))
 
-        self._init_display_folders()
+        # Initialize configuraiton of display
+        self.cols = self.scroll_area.width() // (self.image_width + self.item_hmargin * 2)
+        self.folders_index = 0
+        self.folder_widgets = []
+        self.selected_index = 0
+        self._update_and_ensure_visible()
 
-        _set_scroll_area(_create_content_layout(), scroll_area)
+        # 創建內容佈局
+        content_layout = QGridLayout()
+        content_layout.setSpacing(self.item_hmargin)
+        content_layout.setContentsMargins(
+            self.item_hmargin, self.item_hmargin, self.item_hmargin, self.item_hmargin)
+
+        # 設置滾動區域的內容
+        content_widget = QWidget()
+        content_widget.setLayout(content_layout)
+        scroll_area.setWidget(content_widget)
+
         self.load_images()
 
         # 然後在初始化或適當的位置進行連接
         scroll_area.verticalScrollBar().valueChanged.connect(self._on_scroll_value_changed)
 
-    def _init_display_folders(self):
-        self.cols = self.scroll_area.width() // (self.image_width + 20)  # 計算列數
-        self.folders_index = 0
-        self.folder_widgets = []  # 每次加載時重置
-        self.selected_index = 0  # 重置選取的索引
-        self._update_and_ensure_visible()  # 更新選取項目的樣式
-
     def _on_scroll_value_changed(self):
         if not self.is_loading:
             self.is_loading = True
-            self._on_scroll(self.scroll_area)
-            QTimer.singleShot(50, self._reset_loading_flag)  # 50毫秒後重置標誌位
 
-    def _on_scroll(self, scroll_area):
-        v2m = scroll_area.verticalScrollBar()
-        load_threshold = 300  # 在接近底部300像素時開始加載
-        if self.active_module == 'folder_image_reader' and v2m.value() + load_threshold > v2m.maximum():
-            self.load_images()
+            # Check current position of scroll bar
+            vertical_bar = self.scroll_area.verticalScrollBar()
+            load_threshold = 300
+            if self.active_module == 'folder_image_reader' and vertical_bar.value() + load_threshold >= vertical_bar.maximum():
+                self.load_images()
+
+            QTimer.singleShot(50, self._reset_loading_flag)  # 50毫秒後重置標誌位
 
     def _reset_loading_flag(self):
         self.is_loading = False
 
     def load_images(self, load_all=False):
-        def _show_loading_dialog():
-            loading_dialog = QDialog()
-            loading_dialog.setWindowTitle('加載中...')
-            loading_dialog.setModal(True)
-            layout = QVBoxLayout()
-
-            progress_bar = QProgressBar(loading_dialog)
-            layout.addWidget(progress_bar)
-
-            loading_dialog.setLayout(layout)
-            loading_dialog.setGeometry(400, 300, 300, 100)
-            loading_dialog.show()
-
-            QApplication.processEvents()
-            return loading_dialog, progress_bar
-
-        def _update_progress(progress_bar, loading_dialog, folders_index):
-            progress_bar.setValue(folders_index + 1)  # 更新進度條到當前索引
-            if folders_index + 1 >= progress_bar.maximum():
-                loading_dialog.accept()  # 當達到或超過最大值時關閉加載對話框
-
         idx = self.folders_index
         num_folders = len(self.folders)
         if idx >= num_folders:  # 根據需要加載全部或更多圖像
             return
 
+        # Get new index for more images
+        # end_index is excluded
         end_index = num_folders if load_all else min(
             idx + self.folders_batch_size, num_folders)
         batch_size = end_index - idx
 
-        loading_dialog, progress_bar = _show_loading_dialog()
+        # Display loading dialog
+        progress_bar = QProgressBar()
         progress_bar.setMaximum(batch_size)
+        layout = QVBoxLayout()
+        layout.addWidget(progress_bar)
 
+        loading_dialog = QDialog()
+        loading_dialog.setWindowTitle('加載中...')
+        loading_dialog.setModal(True)
+        loading_dialog.setLayout(layout)
+        loading_dialog.setGeometry(400, 300, 300, 100)
+        loading_dialog.show()
+
+        QApplication.processEvents()
+
+        # Create widget for subfolder
         while idx < end_index:
             folder_widget = self._create_folder_widget(self.folders[idx])
-            row = idx // (self.scroll_area.width() // (self.image_width + 20))
-            col = idx % (self.scroll_area.width() // (self.image_width + 20))
+            num_cols = self.scroll_area.width() // (self.image_width + 2 * self.item_hmargin)
+            row = idx // num_cols
+            col = idx % num_cols
             self.scroll_area.widget().layout().addWidget(folder_widget, row, col)
             self.folder_widgets.append(folder_widget)
-            _update_progress(progress_bar, loading_dialog, idx)  # 正確呼叫更新進度函數
+
+            # 正確呼叫更新進度函數
+            progress_bar.setValue(idx + 1)  # 更新進度條到當前索引
+            if idx + 1 >= progress_bar.maximum():
+                loading_dialog.accept()  # 當達到或超過最大值時關閉加載對話框
             idx += 1
 
         self.folders_index = idx
@@ -147,30 +147,27 @@ class FolderImageReader(QObject):
             label = QLabel(os.path.basename(folder)
                            if label_type == 'folder' else "")
             label.setAlignment(Qt.AlignCenter)
-            if label_type == 'folder':
-                label.setWordWrap(True)
             label.mousePressEvent = lambda event, path=folder: self.callback(
                 path)
+            if label_type == 'folder':
+                label.setWordWrap(True)
             return label
-
-        def _get_first_image(folder_path):
-            """獲取資料夾中的第一張圖片"""
-            for filename in os.listdir(folder_path):
-                if filename.lower().endswith(('.png', '.jpg', '.jpeg')):  # 如果找到符合條件的文件，返回該文件的完整路徑
-                    return os.path.join(folder_path, filename)
-            return None
-
-        folder_widget = QWidget()
-        folder_layout = QVBoxLayout()
 
         folder_label = _create_label(folder, 'folder')
         image_label = _create_label(folder, 'image')
 
+        folder_layout = QVBoxLayout()
         folder_layout.addWidget(image_label)
         folder_layout.addWidget(folder_label)
+        folder_widget = QWidget()
         folder_widget.setLayout(folder_layout)
 
-        first_image_path = _get_first_image(folder)
+        # 獲取資料夾中的第一張圖片
+        first_image_path = ""
+        for filename in os.listdir(folder):
+            if filename.lower().endswith(('.png', '.jpg', '.jpeg')):  # 如果找到符合條件的文件，返回該文件的完整路徑
+                first_image_path = os.path.join(folder, filename)
+                break
         if first_image_path:
             pixmap = QPixmap(first_image_path).scaled(
                 self.image_height, self.image_width, Qt.KeepAspectRatio)
