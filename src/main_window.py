@@ -2,6 +2,7 @@ from PyQt5.QtWidgets import QMainWindow, QVBoxLayout, QScrollArea, QWidget, QScr
 from PyQt5.QtCore import Qt, QTimer
 from PyQt5.QtGui import QKeyEvent
 
+from .reader_mode import ViewerMode, ViewerStatus
 from .image_handlers.image_handler import ImageHandler
 from .image_handlers.image_handler_multi import ImageHandlerMulti
 from .image_handlers.image_handler_single import ImageHandlerSingle
@@ -22,7 +23,7 @@ class ImageViewer(QMainWindow):
         self.initUI()  # 執行 initUI 方法來設定使用者介面
 
         self.toolbar.open_folder()  # 開啟工具列預設資料夾
-        self.active_module = 'folder_image_reader'  # 默認為多頁模式
+        ViewerStatus.current_mode = ViewerMode.FOLDER_IMAGE
         QTimer.singleShot(50, self.image_reader.adjust_layout)
 
     def initUI(self):
@@ -55,11 +56,11 @@ class ImageViewer(QMainWindow):
         modifiers = event.modifiers()
 
         if key == Qt.Key_F5:
-            self.init_active_module("folder_image_reader")
+            ViewerStatus.current_mode = ViewerMode.FOLDER_IMAGE
             self.image_reader.adjust_layout()
 
         # Direction key not working
-        if self.active_module == 'folder_image_reader':
+        if ViewerStatus.current_mode == ViewerMode.FOLDER_IMAGE:
             navigation_map = {
                 Qt.Key_W: lambda: self.image_reader.select_item('col', 'previous'),
                 Qt.Key_Up: lambda: self.image_reader.select_item('col', 'previous'),
@@ -76,7 +77,7 @@ class ImageViewer(QMainWindow):
             if key in navigation_map:
                 navigation_map[key]()
 
-        elif self.active_module in ['multi', 'single']:
+        elif ViewerStatus.current_mode in [ViewerMode.MULTI_PAGE, ViewerMode.SINGLE_PAGE]:
             scroll_map = {
                 Qt.Key_W: QScrollBar.SliderSingleStepSub,
                 Qt.Key_Space: QScrollBar.SliderSingleStepAdd,
@@ -101,18 +102,13 @@ class ImageViewer(QMainWindow):
 
         super().keyPressEvent(event)
 
-    def init_active_module(self, flag):
-        self.active_module = flag
-        self.image_reader.active_module = flag
-        self.image_handler.active_module = flag
-
     def switch_mode(self, mode, folder_path):
-        if mode == 'multi':
+        if mode == ViewerMode.MULTI_PAGE:
             self.image_handler = ImageHandlerMulti()
-        elif mode == 'single':
+        elif mode == ViewerMode.SINGLE_PAGE:
             self.image_handler = ImageHandlerSingle()
 
-        self.init_active_module(mode)
+        ViewerStatus.current_mode = mode
         self.display_images(folder_path)
 
     def display_images(self, folder_path):
@@ -120,10 +116,10 @@ class ImageViewer(QMainWindow):
         self.image_handler.display_images(self.scrollArea)
 
     def display_folders(self, folder_path):
-        self.init_active_module('folder_image_reader')
+        ViewerStatus.current_mode = ViewerMode.FOLDER_IMAGE
         self.image_reader.display_folders(folder_path, self.scrollArea)
 
     def folder_clicked(self, folder_path):
         self.toolbar.folder_clicked_log(folder_path)
-        self.init_active_module('multi')
+        ViewerStatus.current_mode = ViewerMode.MULTI_PAGE
         self.display_images(folder_path)

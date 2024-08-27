@@ -3,6 +3,7 @@ from PyQt5.QtWidgets import QLabel, QWidget, QVBoxLayout, QScrollArea
 from PyQt5.QtCore import Qt
 
 from .image_handler import ImageHandler
+from ..reader_mode import ViewerMode, ViewerStatus
 
 
 class ImageHandlerMulti(ImageHandler):
@@ -18,7 +19,7 @@ class ImageHandlerMulti(ImageHandler):
 
     def on_scroll(self, scroll_area: QScrollArea):
         val2max = scroll_area.verticalScrollBar()
-        if self.active_module in ['multi'] and val2max.value() == val2max.maximum():
+        if ViewerStatus.current_mode == ViewerMode.MULTI_PAGE and val2max.value() == val2max.maximum():
             self.load_more_images()
 
     def __relocateImageIndex(self, scroll_area: QScrollArea):

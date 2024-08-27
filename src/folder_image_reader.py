@@ -4,6 +4,7 @@ from PyQt5.QtWidgets import QVBoxLayout, QLabel, QWidget, QGridLayout, QDialog, 
 from PyQt5.QtGui import QPixmap
 from PyQt5.QtCore import Qt, QObject, QTimer
 
+from .reader_mode import ViewerMode, ViewerStatus
 from .config.config_loader import ConfigLoader
 
 
@@ -25,7 +26,6 @@ class FolderImageReader(QObject):
 
         # Horizontal margin between items
         self.item_hmargin = 10
-        self.active_module = None                           # 活動模組的標識符，可能用於處理不同的功能模組
         self.selected_index = 0                             # 記錄當前選擇的項目索引
         self.folder_widgets = []                            # 保存所有資料夾小部件的列表
         self.cols = 0                                       # 記錄顯示的列數，用於計算顯示布局
@@ -86,7 +86,7 @@ class FolderImageReader(QObject):
             # Check current position of scroll bar
             vertical_bar = self.scroll_area.verticalScrollBar()
             load_threshold = 300
-            if self.active_module == 'folder_image_reader' and vertical_bar.value() + load_threshold >= vertical_bar.maximum():
+            if ViewerStatus.current_mode == ViewerMode.FOLDER_IMAGE and vertical_bar.value() + load_threshold >= vertical_bar.maximum():
                 self.load_images()
 
             QTimer.singleShot(50, self._reset_loading_flag)  # 50毫秒後重置標誌位

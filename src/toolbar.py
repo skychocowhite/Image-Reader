@@ -7,6 +7,7 @@ from PyQt5.QtGui import QIcon
 from PyQt5.QtCore import Qt
 
 
+from .reader_mode import ViewerMode
 from .config.config_loader import ConfigLoader
 
 
@@ -54,13 +55,13 @@ class MainToolBar(QToolBar):
         single_page_action = QAction(
             QIcon(self.asset_path + 'single_page.png'), '單頁模式', self)
         single_page_action.triggered.connect(
-            lambda: self.parent().switch_mode('single', self.folder_stack[-1]))
+            lambda: self.parent().switch_mode(ViewerMode.SINGLE_PAGE, self.folder_stack[-1]))
         self.addAction(single_page_action)
 
         multi_page_action = QAction(
             QIcon(self.asset_path + 'multi_page.png'), '多頁模式', self)
         multi_page_action.triggered.connect(
-            lambda: self.parent().switch_mode('multi', self.folder_stack[-1]))
+            lambda: self.parent().switch_mode(ViewerMode.MULTI_PAGE, self.folder_stack[-1]))
         self.addAction(multi_page_action)
 
         self.path_label = QLabel()

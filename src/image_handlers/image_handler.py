@@ -16,7 +16,6 @@ class ImageHandler:
         self.current_index = 0
         self.labels: list[QLabel] = []
         self.scale_factor = 1.0
-        self.active_module = None
 
     def load_images(self, folder_path):
         self.images = []
