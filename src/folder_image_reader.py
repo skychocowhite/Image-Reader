@@ -4,7 +4,7 @@ from PyQt5.QtWidgets import QVBoxLayout, QLabel, QWidget, QGridLayout, QDialog, 
 from PyQt5.QtGui import QPixmap
 from PyQt5.QtCore import Qt, QObject, QTimer
 
-from .config_loader import ConfigLoader
+from .config.config_loader import ConfigLoader
 
 
 class FolderImageReader(QObject):

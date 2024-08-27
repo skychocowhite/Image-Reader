@@ -7,7 +7,7 @@ from PyQt5.QtGui import QIcon
 from PyQt5.QtCore import Qt
 
 
-from .config_loader import ConfigLoader
+from .config.config_loader import ConfigLoader
 
 
 class MainToolBar(QToolBar):
