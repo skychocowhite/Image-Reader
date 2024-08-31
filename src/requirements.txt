@@ -114,7 +114,7 @@ rich @ file:///C:/b/abs_21nw9z7xby/croot/rich_1720637504376/work
 rope @ file:///C:/b/abs_a4uy0nuc8z/croot/rope_1708963217026/work
 rpds-py @ file:///C:/Users/dev-admin/perseverance-python-buildout/croot/rpds-py_1699565648947/work
 Rtree @ file:///C:/Users/dev-admin/perseverance-python-buildout/croot/rtree_1699565751755/work
-setuptools==69.5.1
+setuptools==70.0.0
 sip @ file:///C:/Users/dev-admin/perseverance-python-buildout/croot/sip_1699475590677/work
 six @ file:///tmp/build/80754af9/six_1644875935023/work
 snowballstemmer @ file:///tmp/build/80754af9/snowballstemmer_1637937080595/work
