@@ -78,7 +78,7 @@ class FolderImageReader(QObject):
         self.load_images()
 
         # 然後在初始化或適當的位置進行連接
-        scroll_area.verticalScrollBar().actionTriggered.connect(
+        scroll_area.verticalScrollBar().valueChanged.connect(
             self._on_scroll_value_changed)
 
     def _on_scroll_value_changed(self):
@@ -87,7 +87,7 @@ class FolderImageReader(QObject):
 
             # Check current position of scroll bar
             vertical_bar = self.scroll_area.verticalScrollBar()
-            load_threshold = 300
+            load_threshold = self.image_height * 2
             if ViewerStatus.current_mode == ViewerMode.FOLDER_IMAGE and vertical_bar.value() + load_threshold >= vertical_bar.maximum():
                 self.load_images()
 

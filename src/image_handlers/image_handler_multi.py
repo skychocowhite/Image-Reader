@@ -17,11 +17,6 @@ class ImageHandlerMulti(ImageHandler):
         scroll_area.setWidget(self.content_widget)
         self.load_more_images()
 
-    def on_scroll(self, scroll_area: QScrollArea):
-        val2max = scroll_area.verticalScrollBar()
-        if ViewerStatus.current_mode == ViewerMode.MULTI_PAGE and val2max.value() == val2max.maximum():
-            self.load_more_images()
-
     def __relocateImageIndex(self, scroll_area: QScrollArea):
         """Get index of the current viewing image"""
 
@@ -34,14 +29,28 @@ class ImageHandlerMulti(ImageHandler):
             end_pos = label.geometry().bottom()
             if start_pos <= current_ave_pos and current_ave_pos <= end_pos:
                 self.current_index = idx
-                break
+                return
 
             # Check margin position betweeen images
             if idx < len(self.labels)-1:
                 next_start_pos = self.labels[idx+1].geometry().top()
                 if end_pos <= current_ave_pos and current_ave_pos <= next_start_pos:
                     self.current_index = idx
-                    break
+                    return
+
+        # Default position in case
+        self.current_index = len(self.labels)-1
+
+    def on_scroll(self, scroll_area: QScrollArea):
+        val2max = scroll_area.verticalScrollBar()
+        threshold = 1000
+
+        if len(self.labels) > 0:
+            threshold = self.labels[0].height() * 5
+
+        if ViewerStatus.current_mode == ViewerMode.MULTI_PAGE and val2max.value() + threshold >= val2max.maximum():
+            self.__relocateImageIndex(scroll_area)
+            self.load_more_images()
 
     def load_more_images(self, count=10):
         while len(self.labels) < len(self.images) and count > 0:

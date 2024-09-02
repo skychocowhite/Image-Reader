@@ -44,14 +44,17 @@ class ImageViewer(QMainWindow):
         self.scrollArea = QScrollArea()
         self.scrollArea.setWidgetResizable(True)
         self.scrollArea.verticalScrollBar().setSingleStep(800)
-        self.scrollArea.verticalScrollBar().valueChanged.connect(
-            lambda: self.image_handler.on_scroll(self.scrollArea))
+        self.scrollArea.verticalScrollBar().valueChanged.connect(self.__on_scroll)
         main_layout.addWidget(self.scrollArea)
 
         # 設定中央小部件並添加佈局
         central_widget = QWidget()
         central_widget.setLayout(main_layout)
         self.setCentralWidget(central_widget)
+
+    def __on_scroll(self):
+        if ViewerStatus.current_mode in [ViewerMode.MULTI_PAGE, ViewerMode.SINGLE_PAGE]:
+            self.image_handler.on_scroll(self.scrollArea)
 
     def keyPressEvent(self, event: QKeyEvent):
         key = event.key()
