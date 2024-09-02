@@ -1,3 +1,5 @@
+import os
+
 from PyQt5.QtWidgets import QMainWindow, QVBoxLayout, QScrollArea, QWidget, QScrollBar, QFileDialog
 from PyQt5.QtCore import Qt, QTimer
 from PyQt5.QtGui import QKeyEvent
@@ -115,9 +117,19 @@ class ImageViewer(QMainWindow):
         self.image_handler.load_images(folder_path)
         self.image_handler.display_images(self.scrollArea)
 
-    def display_folders(self, folder_path):
-        ViewerStatus.current_mode = ViewerMode.FOLDER_IMAGE
-        self.image_reader.display_folders(folder_path, self.scrollArea)
+    def displayFiles(self, folder_path):
+        filenames = list(filename for filename in os.listdir(folder_path))
+
+        # Check if all files in folder are images
+        if_all_images = all(filename.lower().endswith(('.png', '.jpg', '.jpeg'))
+                            for filename in filenames)
+
+        if if_all_images:
+            ViewerStatus.current_mode = ViewerMode.MULTI_PAGE
+            self.display_images(folder_path)
+        else:
+            ViewerStatus.current_mode = ViewerMode.FOLDER_IMAGE
+            self.image_reader.displayFiles(folder_path, self.scrollArea)
 
     def openFolder(self, folder_path=None):
         """Open folder from file explorer"""
@@ -129,9 +141,8 @@ class ImageViewer(QMainWindow):
         # Open files given the folder path
         if folder_path:
             self.toolbar.changeFolder(folder_path)
-            self.display_folders(folder_path)
+            self.displayFiles(folder_path)
 
     def folder_clicked(self, folder_path):
         self.toolbar.folder_clicked_log(folder_path)
-        ViewerStatus.current_mode = ViewerMode.MULTI_PAGE
-        self.display_images(folder_path)
+        self.displayFiles(folder_path)

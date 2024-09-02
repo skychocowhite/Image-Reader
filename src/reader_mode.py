@@ -6,8 +6,6 @@ class ViewerMode(Enum):
     MULTI_PAGE = 'multi_page'
     SINGLE_PAGE = 'single_page'
 
-    current_mode = ''
-
 
 class ViewerStatus():
     current_mode = ''

@@ -78,7 +78,7 @@ class MainToolBar(QToolBar):
             self.folder_stack.pop()
             previous_folder = self.folder_stack[-1]
             self.path_label.setText(previous_folder)
-            self.parent().display_folders(previous_folder)
+            self.parent().displayFiles(previous_folder)
         if len(self.folder_stack) <= 1:
             self.back_action.setEnabled(False)
 

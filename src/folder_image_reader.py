@@ -6,12 +6,13 @@ from PyQt5.QtCore import Qt, QObject, QTimer
 
 from .reader_mode import ViewerMode, ViewerStatus
 from .config.config_loader import ConfigLoader
+from .utils.asset_handler import AssetHandler
 
 
 class FolderImageReader(QObject):
     def __init__(self):
         super().__init__()
-        self.callback = None
+        self.click_callback = None
         config = ConfigLoader.load_config()
         self.image_height = config.get(
             "image_height", 400)                            # 設置顯示圖像的高度和寬度，從配置文件中加載
@@ -20,7 +21,7 @@ class FolderImageReader(QObject):
         # 用於顯示資料夾的滾動區域 (QScrollArea)
         self.scroll_area = None
 
-        self.folders = []                                   # 儲存當前資料夾中的所有子資料夾路徑的列表
+        self.files = []                                   # 儲存當前資料夾中的所有子資料夾路徑的列表
         self.folders_index = 0                              # 記錄當前加載的資料夾索引，用於分批加載資料夾
         self.folders_batch_size = 20                        # 每次批量加載資料夾的數量
 
@@ -31,8 +32,8 @@ class FolderImageReader(QObject):
         self.cols = 0                                       # 記錄顯示的列數，用於計算顯示布局
         self.is_loading = False                             # 標誌位，指示是否正在加載資料夾，以避免重複加載
 
-    def set_callback(self, callback):  # 設置回調函數
-        self.callback = callback
+    def set_callback(self, click_callback):  # 設置回調函數
+        self.click_callback = click_callback
 
     def update_image_size(self, height, width):  # 更新圖片顯示大小
         self.image_height = height
@@ -41,20 +42,20 @@ class FolderImageReader(QObject):
 
     def adjust_layout(self):  # 重新調整佈局
         if self.folder_path:
-            self.display_folders(self.folder_path, self.scroll_area)
+            self.displayFiles(self.folder_path, self.scroll_area)
 
-    def display_folders(self, folder_path: str, scroll_area: QScrollArea):
-        def _read_folders(folder_path):
+    def displayFiles(self, folder_path: str, scroll_area: QScrollArea):
+        def _read_files(folder_path):
             """讀取資料夾中的子資料夾"""
             for item in os.listdir(folder_path):
                 item_path = os.path.join(folder_path, item)
-                if os.path.isdir(item_path):
-                    yield item_path
+                yield item_path
 
         self.folder_path = folder_path
         self.scroll_area = scroll_area
-        # Read all subfolders
-        self.folders = list(_read_folders(folder_path))
+
+        # Read all files in the folder
+        self.files = list(_read_files(folder_path))
 
         # Initialize configuraiton of display
         self.cols = self.scroll_area.width() // (self.image_width + self.item_hmargin * 2)
@@ -77,7 +78,8 @@ class FolderImageReader(QObject):
         self.load_images()
 
         # 然後在初始化或適當的位置進行連接
-        scroll_area.verticalScrollBar().valueChanged.connect(self._on_scroll_value_changed)
+        scroll_area.verticalScrollBar().actionTriggered.connect(
+            self._on_scroll_value_changed)
 
     def _on_scroll_value_changed(self):
         if not self.is_loading:
@@ -96,7 +98,7 @@ class FolderImageReader(QObject):
 
     def load_images(self, load_all=False):
         idx = self.folders_index
-        num_folders = len(self.folders)
+        num_folders = len(self.files)
         if idx >= num_folders:  # 根據需要加載全部或更多圖像
             return
 
@@ -121,9 +123,9 @@ class FolderImageReader(QObject):
 
         QApplication.processEvents()
 
-        # Create widget for subfolder
+        # Create image widgets
         while idx < end_index:
-            folder_widget = self._create_folder_widget(self.folders[idx])
+            folder_widget = self._create_image_widgets(self.files[idx])
             num_cols = self.scroll_area.width() // (self.image_width + 2 * self.item_hmargin)
             row = idx // num_cols
             col = idx % num_cols
@@ -139,41 +141,56 @@ class FolderImageReader(QObject):
         self.folders_index = idx
         loading_dialog.accept()  # 確保對話框在結束時關閉
 
-    def _create_folder_widget(self, folder):
+    def _create_image_widgets(self, file_path):
         """創建單個文件夾小部件"""
 
-        def _create_label(folder, label_type='folder'):
-            """根據類型創建並返回標籤"""
-            label = QLabel(os.path.basename(folder)
-                           if label_type == 'folder' else "")
-            label.setAlignment(Qt.AlignCenter)
-            label.mousePressEvent = lambda event, path=folder: self.callback(
+        name_label = QLabel(os.path.basename(file_path))
+        name_label.setAlignment(Qt.AlignCenter)
+        name_label.setWordWrap(True)
+
+        image_label = QLabel()
+        image_label.setAlignment(Qt.AlignCenter)
+
+        if os.path.isdir(file_path):
+            name_label.mousePressEvent = lambda event, path=file_path: self.click_callback(
                 path)
-            if label_type == 'folder':
-                label.setWordWrap(True)
-            return label
+            image_label.mousePressEvent = lambda event, path=file_path: self.click_callback(
+                path)
 
-        folder_label = _create_label(folder, 'folder')
-        image_label = _create_label(folder, 'image')
+        widget_layout = QVBoxLayout()
+        widget_layout.addWidget(image_label)
+        widget_layout.addWidget(name_label)
+        widget = QWidget()
+        widget.setLayout(widget_layout)
 
-        folder_layout = QVBoxLayout()
-        folder_layout.addWidget(image_label)
-        folder_layout.addWidget(folder_label)
-        folder_widget = QWidget()
-        folder_widget.setLayout(folder_layout)
+        image_path = ""
+        pixmap: QPixmap = None
 
-        # 獲取資料夾中的第一張圖片
-        first_image_path = ""
-        for filename in os.listdir(folder):
-            if filename.lower().endswith(('.png', '.jpg', '.jpeg')):  # 如果找到符合條件的文件，返回該文件的完整路徑
-                first_image_path = os.path.join(folder, filename)
-                break
-        if first_image_path:
-            pixmap = QPixmap(first_image_path).scaled(
-                self.image_height, self.image_width, Qt.KeepAspectRatio)
-            image_label.setPixmap(pixmap)
+        # Create folder widget
+        if os.path.isdir(file_path):
+            for filename in os.listdir(file_path):
+                if filename.lower().endswith(('.png', '.jpg', '.jpeg')):
+                    image_path = os.path.join(file_path, filename)
+                    break
 
-        return folder_widget
+            if image_path:
+                pixmap = QPixmap(image_path)
+            else:
+                pixmap = QPixmap(AssetHandler.asset_path + 'folder.png')
+
+        # Create image widget
+        elif file_path.lower().endswith(('.png', '.jpg', '.jpeg')):
+            pixmap = QPixmap(file_path)
+
+        # Create widget other than two main options
+        else:
+            pixmap = QPixmap(AssetHandler.asset_path + 'gear.png')
+
+        pixmap = pixmap.scaled(
+            self.image_height, self.image_width, Qt.KeepAspectRatio)
+        image_label.setPixmap(pixmap)
+
+        return widget
 
     def select_item(self, axis, direction):
         """根據給定的軸（列或行）和方向選擇下一個或上一個項目"""
@@ -208,6 +225,7 @@ class FolderImageReader(QObject):
     def select_current_item(self):
         if self.selected_index < len(self.folder_widgets):
             folder_widget = self.folder_widgets[self.selected_index]
-            folder_label = folder_widget.layout().itemAt(1).widget()  # 獲取 folder_label
-            folder_path = os.path.join(self.folder_path, folder_label.text())
-            self.callback(folder_path)
+            name_label = folder_widget.layout().itemAt(1).widget()  # 獲取 name_label
+            folder_path = os.path.join(self.folder_path, name_label.text())
+            if os.path.isdir(folder_path):
+                self.click_callback(folder_path)
