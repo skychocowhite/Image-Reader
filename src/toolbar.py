@@ -26,7 +26,7 @@ class MainToolBar(QToolBar):
     def initUI(self):
         open_action = QAction(
             QIcon(self.asset_path + 'open.png'), '打開文件夾', self)
-        open_action.triggered.connect(self.open_folder)
+        open_action.triggered.connect(lambda: self.parent().openFolder())
         self.addAction(open_action)
 
         back_action = QAction(
@@ -67,13 +67,10 @@ class MainToolBar(QToolBar):
         self.path_label = QLabel()
         self.addWidget(self.path_label)
 
-    def open_folder(self, folder_path=None):
-        if not folder_path:
-            folder_path = QFileDialog.getExistingDirectory(self, "打開文件夾", "")
-        if folder_path:
-            self.folder_stack.append(folder_path)
-            self.path_label.setText(folder_path)
-            self.parent().display_folders(folder_path)
+    def changeFolder(self, folder_path):
+        self.folder_stack.append(folder_path)
+        self.path_label.setText(folder_path)
+        if len(self.folder_stack) > 1:
             self.back_action.setEnabled(True)
 
     def go_back(self):
@@ -81,7 +78,7 @@ class MainToolBar(QToolBar):
             self.folder_stack.pop()
             previous_folder = self.folder_stack[-1]
             self.path_label.setText(previous_folder)
-            self.parent().display_folders(previous_folder)
+            self.parent().displayFiles(previous_folder)
         if len(self.folder_stack) <= 1:
             self.back_action.setEnabled(False)
 
