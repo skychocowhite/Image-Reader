@@ -17,14 +17,16 @@ class ImageHandler:
         self.labels: list[QLabel] = []
         self.scale_factor = 1.0
 
-    def load_images(self, folder_path):
+    def load_images(self, folder_paths: list[str]):
         self.images = []
         self.current_index = 0
         self.labels = []
-        for filename in natsorted(os.listdir(folder_path)):
-            if filename.lower().endswith(('.png', '.jpg', '.jpeg')):
-                img_path = os.path.join(folder_path, filename)
-                self.images.append(img_path)
+
+        for folder_path in folder_paths:
+            for filename in natsorted(os.listdir(folder_path)):
+                if filename.lower().endswith(('.png', '.jpg', '.jpeg')):
+                    img_path = os.path.join(folder_path, filename)
+                    self.images.append(img_path)
 
     def on_scroll(self, scroll_area: QScrollArea):
         return NotImplemented

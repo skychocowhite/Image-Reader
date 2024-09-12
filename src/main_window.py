@@ -117,7 +117,7 @@ class ImageViewer(QMainWindow):
         self.display_images(folder_path)
 
     def display_images(self, folder_path):
-        self.image_handler.load_images(folder_path)
+        self.image_handler.load_images([folder_path])
         self.image_handler.display_images(self.scrollArea)
 
     def displayFiles(self, folder_path):
