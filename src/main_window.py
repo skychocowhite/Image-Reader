@@ -121,7 +121,8 @@ class ImageViewer(QMainWindow):
         self.image_handler.display_images(self.scrollArea)
 
     def displayFiles(self, folder_path):
-        filenames = list(filename for filename in os.listdir(folder_path))
+        filenames: list[str] = list(
+            filename for filename in os.listdir(folder_path))
 
         # Check if all files in folder are images
         if_all_images = all(filename.lower().endswith(('.png', '.jpg', '.jpeg'))
@@ -130,9 +131,11 @@ class ImageViewer(QMainWindow):
         if if_all_images:
             ViewerStatus.current_mode = ViewerMode.MULTI_PAGE
             self.display_images(folder_path)
+            self.toolbar.changeMultiChoiceState(False)
         else:
             ViewerStatus.current_mode = ViewerMode.FOLDER_IMAGE
             self.image_reader.displayFiles(folder_path, self.scrollArea)
+            self.toolbar.changeMultiChoiceState(True)
 
     def openFolder(self, folder_path=None):
         """Open folder from file explorer"""
