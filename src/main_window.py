@@ -55,6 +55,8 @@ class ImageViewer(QMainWindow):
     def __on_scroll(self):
         if ViewerStatus.current_mode in [ViewerMode.MULTI_PAGE, ViewerMode.SINGLE_PAGE]:
             self.image_handler.on_scroll(self.scrollArea)
+        elif ViewerStatus.current_mode == ViewerMode.FOLDER_IMAGE:
+            self.image_reader.on_scroll_value_changed()
 
     def keyPressEvent(self, event: QKeyEvent):
         key = event.key()

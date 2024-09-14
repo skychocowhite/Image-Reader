@@ -77,11 +77,9 @@ class FolderImageReader(QObject):
 
         self.load_images()
 
-        # 然後在初始化或適當的位置進行連接
-        scroll_area.verticalScrollBar().valueChanged.connect(
-            self._on_scroll_value_changed)
+    def on_scroll_value_changed(self):
+        """Scroll event"""
 
-    def _on_scroll_value_changed(self):
         if not self.is_loading:
             self.is_loading = True
 
