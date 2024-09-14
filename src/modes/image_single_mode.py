@@ -3,7 +3,7 @@ from PyQt5.QtGui import QKeyEvent
 from PyQt5.QtWidgets import QScrollBar
 
 from ..toolbar import ToolbarActions
-from ..reader_mode import ViewerMode
+from .reader_mode import ViewerMode
 from .mode import Mode
 
 from typing import TYPE_CHECKING
@@ -26,6 +26,10 @@ class SingleImageMode(Mode):
     def __set_toolbar_action(self):
         self.image_viewer.toolbar.actions[ToolbarActions.MULTI_CHOICE].setEnabled(
             False)
+        self.image_viewer.toolbar.actions[ToolbarActions.MULTI_PAGE].setEnabled(
+            True)
+        self.image_viewer.toolbar.actions[ToolbarActions.SINGLE_PAGE].setEnabled(
+            True)
 
     def key_press_event(self, event: QKeyEvent):
         key = event.key()

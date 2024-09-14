@@ -2,7 +2,7 @@ import os
 
 from PyQt5.QtGui import QKeyEvent
 
-from ..reader_mode import ViewerMode
+from .reader_mode import ViewerMode
 
 from typing import TYPE_CHECKING
 if TYPE_CHECKING:

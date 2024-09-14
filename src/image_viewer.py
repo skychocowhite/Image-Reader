@@ -2,11 +2,11 @@ from PyQt5.QtWidgets import QMainWindow, QVBoxLayout, QScrollArea, QWidget, QFil
 from PyQt5.QtCore import QTimer
 from PyQt5.QtGui import QKeyEvent
 
-from .reader_mode import ViewerMode
+from .modes.reader_mode import ViewerMode
 from .image_handlers.image_handler import ImageHandler
 from .image_handlers.image_handler_multi import ImageHandlerMulti
 from .image_handlers.image_handler_single import ImageHandlerSingle
-from .folder_image_reader import FolderImageReader
+from .folder_image_handlers.folder_image_reader import FolderImageReader
 from .toolbar import MainToolBar
 from .modes.mode import Mode
 from .modes.folder_image_mode import FolderImageMode
@@ -25,8 +25,8 @@ class ImageViewer(QMainWindow):
         self.image_reader.set_callback(self.folder_clicked)  # 設定回調函數
         self.mode: Mode = None
 
-        self.set_mode(ViewerMode.FOLDER_IMAGE)
         self.initUI()  # 執行 initUI 方法來設定使用者介面
+        self.set_mode(ViewerMode.FOLDER_IMAGE)
         self.openFolder()
 
         QTimer.singleShot(50, self.image_reader.adjust_layout)

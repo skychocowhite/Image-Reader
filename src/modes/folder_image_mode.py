@@ -2,7 +2,7 @@ from PyQt5.QtCore import Qt
 from PyQt5.QtGui import QKeyEvent
 
 from ..toolbar import ToolbarActions
-from ..reader_mode import ViewerMode
+from .reader_mode import ViewerMode
 from .mode import Mode
 
 from typing import TYPE_CHECKING
@@ -36,6 +36,10 @@ class FolderImageMode(Mode):
     def __set_toolbar_action(self):
         self.image_viewer.toolbar.actions[ToolbarActions.MULTI_CHOICE].setEnabled(
             True)
+        self.image_viewer.toolbar.actions[ToolbarActions.MULTI_PAGE].setEnabled(
+            False)
+        self.image_viewer.toolbar.actions[ToolbarActions.SINGLE_PAGE].setEnabled(
+            False)
 
     def key_press_event(self, event: QKeyEvent):
         key = event.key()

@@ -7,7 +7,7 @@ from PyQt5.QtGui import QIcon
 from PyQt5.QtCore import Qt
 
 
-from .reader_mode import ViewerMode
+from .modes.reader_mode import ViewerMode
 from .config.config_loader import ConfigLoader
 
 
