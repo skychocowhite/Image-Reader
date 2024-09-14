@@ -2,6 +2,7 @@ from PyQt5.QtCore import Qt
 from PyQt5.QtGui import QKeyEvent
 from PyQt5.QtWidgets import QScrollBar
 
+from ..toolbar import ToolbarActions
 from ..reader_mode import ViewerMode
 from .mode import Mode
 
