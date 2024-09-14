@@ -28,66 +28,66 @@ class MainToolBar(QToolBar):
         open_action = QAction(
             QIcon(self.asset_path + 'open.png'), '打開文件夾', self)
         open_action.triggered.connect(lambda: self.parent().openFolder())
-        self.actions[self.ToolbarActions.OPEN_FOLDER] = open_action
+        self.actions[ToolbarActions.OPEN_FOLDER] = open_action
         self.addAction(open_action)
 
         back_action = QAction(
             QIcon(self.asset_path + 'back.png'), '返回上一頁', self)
         back_action.triggered.connect(self.go_back)
         back_action.setEnabled(False)
-        self.actions[self.ToolbarActions.BACK] = back_action
+        self.actions[ToolbarActions.BACK] = back_action
         self.addAction(back_action)
 
         adjust_scroll_action = QAction(
             QIcon(self.asset_path + 'adjust.png'), '調整滾動行數', self)
         adjust_scroll_action.triggered.connect(self.open_adjust_scroll_dialog)
-        self.actions[self.ToolbarActions.ADJUST_SCROLL] = adjust_scroll_action
+        self.actions[ToolbarActions.ADJUST_SCROLL] = adjust_scroll_action
         self.addAction(adjust_scroll_action)
 
         adjust_layout_action = QAction(
             QIcon(self.asset_path + 'relayout.png'), '重新調整佈局', self)
         adjust_layout_action.triggered.connect(
             self.parent().image_reader.adjust_layout)
-        self.actions[self.ToolbarActions.ADJUST_LAYOUT] = adjust_layout_action
+        self.actions[ToolbarActions.ADJUST_LAYOUT] = adjust_layout_action
         self.addAction(adjust_layout_action)
 
         settings_action = QAction(
             QIcon(self.asset_path + 'setting.png'), '設定', self)
         settings_action.triggered.connect(self.open_settings_dialog)
-        self.actions[self.ToolbarActions.SETTINGS] = settings_action
+        self.actions[ToolbarActions.SETTINGS] = settings_action
         self.addAction(settings_action)
 
         single_page_action = QAction(
             QIcon(self.asset_path + 'single_page.png'), '單頁模式', self)
         single_page_action.triggered.connect(
             lambda: self.parent().switch_mode(ViewerMode.SINGLE_PAGE, self.folder_stack[-1]))
-        self.actions[self.ToolbarActions.SINGLE_PAGE] = single_page_action
+        self.actions[ToolbarActions.SINGLE_PAGE] = single_page_action
         self.addAction(single_page_action)
 
         multi_page_action = QAction(
             QIcon(self.asset_path + 'multi_page.png'), '多頁模式', self)
         multi_page_action.triggered.connect(
             lambda: self.parent().switch_mode(ViewerMode.MULTI_PAGE, self.folder_stack[-1]))
-        self.actions[self.ToolbarActions.MULTI_PAGE] = multi_page_action
+        self.actions[ToolbarActions.MULTI_PAGE] = multi_page_action
         self.addAction(multi_page_action)
 
         multi_choice_action = QAction(
             QIcon(self.asset_path + 'choice.png'), '選擇多項', self)
         # multi_choice_action.triggered.connect(...) # TODO: add multiple triggered method
-        self.actions[self.ToolbarActions.MULTI_CHOICE] = multi_choice_action
+        self.actions[ToolbarActions.MULTI_CHOICE] = multi_choice_action
         self.addAction(multi_choice_action)
 
         self.path_label = QLabel()
         self.addWidget(self.path_label)
 
     def changeMultiChoiceState(self, state):
-        self.actions[self.ToolbarActions.MULTI_CHOICE].setEnabled(state)
+        self.actions[ToolbarActions.MULTI_CHOICE].setEnabled(state)
 
     def changeFolder(self, folder_path):
         self.folder_stack.append(folder_path)
         self.path_label.setText(folder_path)
         if len(self.folder_stack) > 1:
-            self.actions[self.ToolbarActions.BACK].setEnabled(True)
+            self.actions[ToolbarActions.BACK].setEnabled(True)
 
     def go_back(self):
         if len(self.folder_stack) > 1:
@@ -96,12 +96,12 @@ class MainToolBar(QToolBar):
             self.path_label.setText(previous_folder)
             self.parent().display_files(previous_folder)
         if len(self.folder_stack) <= 1:
-            self.actions[self.ToolbarActions.BACK].setEnabled(False)
+            self.actions[ToolbarActions.BACK].setEnabled(False)
 
     def folder_clicked_log(self, folder_path):
         self.folder_stack.append(folder_path)
         self.path_label.setText(folder_path)
-        self.actions[self.ToolbarActions.BACK].setEnabled(True)
+        self.actions[ToolbarActions.BACK].setEnabled(True)
 
     def open_adjust_scroll_dialog(self):
         dialog = self.AdjustScrollDialog(self)
@@ -120,16 +120,6 @@ class MainToolBar(QToolBar):
 
     def update_image_size(self, height, width):
         self.parent().image_reader.update_image_size(height, width)
-
-    class ToolbarActions(Enum):
-        OPEN_FOLDER = 'open_folder'
-        BACK = 'back'
-        ADJUST_SCROLL = 'adjust_scroll'
-        ADJUST_LAYOUT = 'adjust_layout'
-        SETTINGS = 'settings'
-        SINGLE_PAGE = 'single_page'
-        MULTI_PAGE = 'multi_page'
-        MULTI_CHOICE = 'multi_choice'
 
     class AdjustScrollDialog(QDialog):
         def __init__(self, parent=None):
@@ -193,3 +183,14 @@ class MainToolBar(QToolBar):
                 'height': int(self.image_height_input.text()),
                 'width': int(self.image_width_input.text())
             }
+
+
+class ToolbarActions(Enum):
+    OPEN_FOLDER = 'open_folder'
+    BACK = 'back'
+    ADJUST_SCROLL = 'adjust_scroll'
+    ADJUST_LAYOUT = 'adjust_layout'
+    SETTINGS = 'settings'
+    SINGLE_PAGE = 'single_page'
+    MULTI_PAGE = 'multi_page'
+    MULTI_CHOICE = 'multi_choice'

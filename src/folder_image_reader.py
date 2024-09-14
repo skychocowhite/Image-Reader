@@ -4,7 +4,6 @@ from PyQt5.QtWidgets import QVBoxLayout, QLabel, QWidget, QGridLayout, QDialog, 
 from PyQt5.QtGui import QPixmap
 from PyQt5.QtCore import Qt, QObject, QTimer
 
-from .reader_mode import ViewerMode
 from .config.config_loader import ConfigLoader
 from .utils.asset_handler import AssetHandler
 

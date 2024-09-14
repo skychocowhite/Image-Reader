@@ -2,6 +2,7 @@ from PyQt5.QtCore import Qt
 from PyQt5.QtGui import QKeyEvent
 from PyQt5.QtWidgets import QScrollBar
 
+from ..toolbar import ToolbarActions
 from ..reader_mode import ViewerMode
 from .mode import Mode
 
@@ -19,6 +20,12 @@ class MultiImageMode(Mode):
             Qt.Key_Space: QScrollBar.SliderSingleStepAdd,
             Qt.Key_S: QScrollBar.SliderSingleStepAdd,
         }
+
+        self.__set_toolbar_action()
+
+    def __set_toolbar_action(self):
+        self.image_viewer.toolbar.actions[ToolbarActions.MULTI_CHOICE].setEnabled(
+            False)
 
     def key_press_event(self, event: QKeyEvent):
         key = event.key()

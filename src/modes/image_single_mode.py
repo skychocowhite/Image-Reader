@@ -20,6 +20,12 @@ class SingleImageMode(Mode):
             Qt.Key_S: QScrollBar.SliderSingleStepAdd,
         }
 
+        self.__set_toolbar_action()
+
+    def __set_toolbar_action(self):
+        self.image_viewer.toolbar.actions[ToolbarActions.MULTI_CHOICE].setEnabled(
+            False)
+
     def key_press_event(self, event: QKeyEvent):
         key = event.key()
         modifiers = event.modifiers()

@@ -1,6 +1,7 @@
 from PyQt5.QtCore import Qt
 from PyQt5.QtGui import QKeyEvent
 
+from ..toolbar import ToolbarActions
 from ..reader_mode import ViewerMode
 from .mode import Mode
 
@@ -29,6 +30,12 @@ class FolderImageMode(Mode):
             Qt.Key_F: lambda: self.image_viewer.image_reader.load_images(
                 load_all=True)
         }
+
+        self.__set_toolbar_action()
+
+    def __set_toolbar_action(self):
+        self.image_viewer.toolbar.actions[ToolbarActions.MULTI_CHOICE].setEnabled(
+            True)
 
     def key_press_event(self, event: QKeyEvent):
         key = event.key()
