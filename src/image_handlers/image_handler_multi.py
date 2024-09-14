@@ -3,7 +3,6 @@ from PyQt5.QtWidgets import QLabel, QWidget, QVBoxLayout, QScrollArea
 from PyQt5.QtCore import Qt
 
 from .image_handler import ImageHandler
-from ..reader_mode import ViewerMode, ViewerStatus
 
 
 class ImageHandlerMulti(ImageHandler):
@@ -48,7 +47,7 @@ class ImageHandlerMulti(ImageHandler):
         if len(self.labels) > 0:
             threshold = self.labels[0].height() * 5
 
-        if ViewerStatus.current_mode == ViewerMode.MULTI_PAGE and val2max.value() + threshold >= val2max.maximum():
+        if val2max.value() + threshold >= val2max.maximum():
             self.__relocateImageIndex(scroll_area)
             self.load_more_images()
 
